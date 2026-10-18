@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM 应用开发入门教程</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232733;
+    --border: #2e3345;
+    --text: #e4e6f0;
+    --text2: #9498aa;
+    --accent: #6c8cff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --orange: #fb923c;
+    --red: #f87171;
+    --yellow: #fbbf24;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    padding: 0;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: var(--text2);
+    font-size: 1.05rem;
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 28px 0 10px;
+  }
+  p { margin-bottom: 12px; color: var(--text2); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px;
+    font-size: 0.92rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+  }
+  td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  tr:hover td { background: var(--surface); }
+  code {
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    color: var(--yellow);
+    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  }
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 12px 0 20px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+  }
+  .comment { color: #6b7280; }
+  .keyword { color: var(--accent2); }
+  .string { color: var(--green); }
+  .func { color: var(--orange); }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+  a:hover { border-bottom-color: var(--accent); }
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .tag-free { background: rgba(52,211,153,0.15); color: var(--green); }
+  .tag-paid { background: rgba(251,146,60,0.15); color: var(--orange); }
+  .tag-new { background: rgba(108,140,255,0.15); color: var(--accent); }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0 16px;
+  }
+  .path-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0 24px;
+  }
+  .path-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .path-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+  .step-desc { color: var(--text2); font-size: 0.88rem; margin-top: 2px; }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+  .week-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .week-label {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .week-title { font-size: 0.92rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .week-detail { font-size: 0.82rem; color: var(--text2); }
+  .link-list {
+    list-style: none;
+    margin: 12px 0 20px;
+  }
+  .link-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .link-list li:last-child { border-bottom: none; }
+  .link-name { font-weight: 600; color: var(--text); }
+  .link-url { font-size: 0.82rem; color: var(--accent); word-break: break-all; }
+  .tip-box {
+    background: rgba(108,140,255,0.08);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.9rem;
+    color: var(--text2);
+  }
+  .tip-box strong { color: var(--accent); }
+  .cost-highlight {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(52,211,153,0.1);
+    border: 1px solid rgba(52,211,153,0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--green);
+    font-weight: 600;
+    margin: 8px 0;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+  .nav-links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-links a {
+    font-size: 0.85rem;
+    color: var(--text2);
+    border: none;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  @media (max-width: 600px) {
+    .container { padding: 24px 16px 60px; }
+    h1 { font-size: 1.6rem; }
+    pre { padding: 12px 14px; font-size: 0.8rem; }
+    .week-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>LLM 应用开发入门教程</h1>
+  <p class="subtitle">整合 9 大 AI 学习平台资源 · 从零基础到能做出自己的 AI 应用</p>
+
+  <div class="nav-links">
+    <a href="#start">选起点</a>
+    <a href="#free-path">免费路径</a>
+    <a href="#project">动手项目</a>
+    <a href="#courses">课程推荐</a>
+    <a href="#tools">工具速查</a>
+    <a href="#plan">12周计划</a>
+    <a href="#links">资源链接</a>
+  </div>
+
+  <!-- 第一节 -->
+  <h2 id="start">一、先选一个起点</h2>
+  <p>根据你目前的水平，选择最适合的起点：</p>
+
+  <table>
+    <tr><th>你的水平</th><th>从这里开始</th></tr>
+    <tr>
+      <td>完全零基础</td>
+      <td><a href="https://huggingface.co/learn/nlp-course">Hugging Face Learn NLP 课程</a>（第0-3章）</td>
+    </tr>
+    <tr>
+      <td>会一点 Python</td>
+      <td><a href="https://academy.openai.com/">OpenAI Academy</a> 或 <a href="https://www.deeplearning.ai/">DeepLearning.AI</a></td>
+    </tr>
+    <tr>
+      <td>有 ML 基础</td>
+      <td><a href="https://www.nvidia.com/en-us/training/">NVIDIA DLI</a> + Hugging Face LLM 课程</td>
+    </tr>
+    <tr>
+      <td>想直接做项目</td>
+      <td>跳过本节，直接看第三章动手做</td>
+    </tr>
+  </table>
+
+  <!-- 第二节 -->
+  <h2 id="free-path">二、最省钱的免费路径</h2>
+  <p>以下是<strong>全程不花钱</strong>的最优路线：</p>
+  <div class="cost-highlight">$0 总花费</div>
+
+  <div class="path-box">
+    <div class="path-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Hugging Face Learn（NLP 基础）</div>
+        <div class="step-desc">
+          <a href="https://huggingface.co/learn/nlp-course">huggingface.co/learn/nlp-course</a><br>
+          免费，13章，Transformer / Tokenizer / 微调入门
+          <span class="tag tag-free">免费</span>
+        </div>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Hugging Face Learn（LLM 进阶）</div>
+        <div class="step-desc">
+          <a href="https://huggingface.co/learn/llm-course">huggingface.co/learn/llm-course</a><br>
+          免费，13章，大模型原理 / 微调 / RLHF / 部署
+          <span class="tag tag-free">免费</span>
+        </div>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">OpenAI Academy</div>
+        <div class="step-desc">
+          <a href="https://academy.openai.com/">academy.openai.com</a><br>
+          免费，Prompt Engineering / GPTs / Assistants API
+          <span class="tag tag-free">免费</span>
+        </div>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Anthropic Claude Academy</div>
+        <div class="step-desc">
+          <a href="https://academy.claude.com/">academy.claude.com</a><br>
+          免费，Claude 使用技巧 + 安全提示工程
+          <span class="tag tag-free">免费</span>
+        </div>
+      </div>
+    </div>
+    <div class="path-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">IBM SkillsBuild（可选，适合写简历）</div>
+        <div class="step-desc">
+          <a href="https://skillsbuild.org/">skillsbuild.org</a><br>
+          免费，完成课程可获得数字徽章
+          <span class="tag tag-free">免费 + 证书</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第三节 -->
+  <h2 id="project">三、动手做第一个应用（2小时）</h2>
+
+  <h3>工具选择</h3>
+  <table>
+    <tr><th>场景</th><th>推荐</th><th>费用</th></tr>
+    <tr><td>快速原型</td><td>OpenAI GPT-4o / Claude Sonnet</td><td><span class="tag tag-paid">按量付费</span></td></tr>
+    <tr><td>开源可控</td><td>Hugging Face + 本地模型</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>企业级部署</td><td>AWS Bedrock / Azure AI</td><td><span class="tag tag-paid">按量付费</span></td></tr>
+  </table>
+
+  <h3>项目一：智能问答机器人（最小可用版）</h3>
+  <pre><code><span class="comment"># 安装依赖</span>
+pip install openai langchain chromadb
+
+<span class="comment"># 最小可用代码（10行）</span>
+<span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+
+client = OpenAI(api_key=<span class="string">"你的key"</span>)
+
+response = client.chat.completions.create(
+    model=<span class="string">"gpt-4o-mini"</span>,
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"你好，介绍一下你自己"</span>}]
+)
+print(response.choices[0].message.content)</code></pre>
+
+  <h3>项目二：加知识库（RAG）</h3>
+  <div class="tip-box">
+    <strong>RAG 原理：</strong>把文档切块 → 向量化存储 → 问答时检索相关片段 → 喂给模型生成答案。无需微调模型。
+  </div>
+  <pre><code><span class="comment"># RAG 简单示例</span>
+<span class="keyword">from</span> langchain.document_loaders <span class="keyword">import</span> TextLoader
+<span class="keyword">from</span> langchain.embeddings <span class="keyword">import</span> OpenAIEmbeddings
+<span class="keyword">from</span> langchain.vectorstores <span class="keyword">import</span> Chroma
+<span class="keyword">from</span> langchain.chains <span class="keyword">import</span> RetrievalQA
+<span class="keyword">from</span> langchain.llms <span class="keyword">import</span> OpenAI
+
+<span class="comment"># 1. 加载文档</span>
+loader = TextLoader(<span class="string">"your_docs.txt"</span>)
+documents = loader.load()
+
+<span class="comment"># 2. 建向量库（本地运行，零成本）</span>
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma.from_documents(documents, embeddings)
+
+<span class="comment"># 3. 问答</span>
+qa = RetrievalQA.from_chain_type(
+    llm=OpenAI(model=<span class="string">"gpt-4o-mini"</span>),
+    retriever=vectorstore.as_retriever()
+)
+result = qa.invoke(<span class="string">"我的文档里说了什么？"</span>)
+print(result)</code></pre>
+
+  <div class="tip-box">
+    <strong>替代方案（全免费）：</strong>Embedding 用 Hugging Face 的 <code>BGE-small-zh</code>，向量库用 <code>FAISS</code>，模型用 <code>Ollama</code> 本地跑 <code>qwen2.5</code>，API 完全不需要付费。
+  </div>
+
+  <!-- 第四节 -->
+  <h2 id="courses">四、各平台课程推荐（按方向）</h2>
+
+  <h3>方向 A：Prompt 工程 &amp; API 调用</h3>
+  <table>
+    <tr><th>平台</th><th>课程</th><th>费用</th></tr>
+    <tr><td>OpenAI Academy</td><td>Prompt Engineering</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>OpenAI Academy</td><td>GPTs 构建</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>Anthropic Academy</td><td>Claude 提示工程</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>DeepLearning.AI</td><td>ChatGPT Prompt Eng for Developers</td><td><span class="tag tag-free">免费旁听</span></td></tr>
+  </table>
+
+  <h3>方向 B：微调 &amp; 模型训练</h3>
+  <table>
+    <tr><th>平台</th><th>课程</th><th>费用</th></tr>
+    <tr><td>Hugging Face LLM Course</td><td>微调与部署（第7-12章）</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>DeepLearning.AI</td><td>Fine-tuning LLMs</td><td><span class="tag tag-paid">$25-50/月</span></td></tr>
+    <tr><td>NVIDIA DLI</td><td>Generative AI &amp; LLM</td><td><span class="tag tag-free">免费（认证$200+）</span></td></tr>
+  </table>
+
+  <h3>方向 C：生产部署 &amp; 工程化</h3>
+  <table>
+    <tr><th>平台</th><th>课程</th><th>费用</th></tr>
+    <tr><td>NVIDIA DLI</td><td>推理优化</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>AWS Skill Builder</td><td>GenAI 课程</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>Google AI</td><td>Vertex AI 教程</td><td><span class="tag tag-free">免费</span></td></tr>
+  </table>
+
+  <!-- 第五节 -->
+  <h2 id="tools">五、常见工具速查</h2>
+  <table>
+    <tr><th>用途</th><th>工具</th><th>费用</th></tr>
+    <tr><td>API 调用</td><td>OpenAI / Claude / Gemini</td><td><span class="tag tag-paid">按量付费</span></td></tr>
+    <tr><td>开源模型托管</td><td>Hugging Face Inference API</td><td><span class="tag tag-free">免费额度</span></td></tr>
+    <tr><td>本地跑模型</td><td>Ollama / LM Studio</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>向量数据库</td><td>ChromaDB / FAISS</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>应用框架</td><td>LangChain / LlamaIndex</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>工作流编排</td><td>CrewAI / AutoGen</td><td><span class="tag tag-free">免费</span></td></tr>
+    <tr><td>前端界面</td><td>Streamlit / Gradio</td><td><span class="tag tag-free">免费</span></td></tr>
+  </table>
+
+  <!-- 第六节 -->
+  <h2 id="plan">六、推荐学习顺序（12周计划）</h2>
+
+  <div class="week-grid">
+    <div class="week-card">
+      <div class="week-label">第 1-2 周</div>
+      <div class="week-title">Python 基础 + OpenAI API 入门</div>
+      <div class="week-detail">OpenAI Academy 前3门课</div>
+    </div>
+    <div class="week-card">
+      <div class="week-label">第 3-4 周</div>
+      <div class="week-title">Prompt Engineering 系统学习</div>
+      <div class="week-detail">DeepLearning.AI + Anthropic Academy</div>
+    </div>
+    <div class="week-card">
+      <div class="week-label">第 5-6 周</div>
+      <div class="week-title">RAG 原理与实践</div>
+      <div class="week-detail">HF NLP Course 第0-6章 + 做一个问答机器人</div>
+    </div>
+    <div class="week-card">
+      <div class="week-label">第 7-8 周</div>
+      <div class="week-title">微调入门</div>
+      <div class="week-detail">HF LLM Course 第7-9章 + LoRA 微调一个小模型</div>
+    </div>
+    <div class="week-card">
+      <div class="week-label">第 9-10 周</div>
+      <div class="week-title">部署与工程化</div>
+      <div class="week-detail">NVIDIA DLI 推理课程 + Streamlit Web 界面</div>
+    </div>
+    <div class="week-card">
+      <div class="week-label">第 11-12 周</div>
+      <div class="week-title">做一个完整项目</div>
+      <div class="week-detail">文档问答 / AI 助手 / 代码助手，部署到 HF Spaces</div>
+    </div>
+  </div>
+
+  <!-- 第七节 -->
+  <h2 id="links">七、免费资源汇总链接</h2>
+  <ul class="link-list">
+    <li>
+      <span class="link-name">Hugging Face NLP Course</span>
+      <span class="link-url">huggingface.co/learn/nlp-course</span>
+    </li>
+    <li>
+      <span class="link-name">Hugging Face LLM Course</span>
+      <span class="link-url">huggingface.co/learn/llm-course</span>
+    </li>
+    <li>
+      <span class="link-name">OpenAI Academy</span>
+      <span class="link-url">academy.openai.com</span>
+    </li>
+    <li>
+      <span class="link-name">Anthropic Claude Academy</span>
+      <span class="link-url">academy.claude.com</span>
+    </li>
+    <li>
+      <span class="link-name">IBM SkillsBuild</span>
+      <span class="link-url">skillsbuild.org</span>
+    </li>
+    <li>
+      <span class="link-name">NVIDIA DLI</span>
+      <span class="link-url">nvidia.com/en-us/training</span>
+    </li>
+    <li>
+      <span class="link-name">AWS Skill Builder</span>
+      <span class="link-url">explore.skillbuilder.aws</span>
+    </li>
+    <li>
+      <span class="link-name">Google AI Learning</span>
+      <span class="link-url">skills.google</span>
+    </li>
+    <li>
+      <span class="link-name">DeepLearning.AI</span>
+      <span class="link-url">deeplearning.ai</span>
+    </li>
+  </ul>
+
+  <!-- 第八节 -->
+  <h2>八、下一步建议</h2>
+  <p>学完基础后，任选一个方向深入：</p>
+  <table>
+    <tr><th>方向</th><th>学什么</th><th>推荐平台</th></tr>
+    <tr><td>AI Agent</td><td>CrewAI / AutoGen，做多步推理任务</td><td>Hugging Face + DeepLearning.AI</td></tr>
+    <tr><td>企业级部署</td><td>AWS Bedrock / Azure AI，走云原生路线</td><td>AWS Skill Builder</td></tr>
+    <tr><td>开源模型</td><td>Llama / Qwen 微调，自建私有模型</td><td>Hugging Face LLM Course</td></tr>
+    <tr><td>多模态</td><td>图像处理 + LLM 结合（DALL-E / CLIP）</td><td>DeepLearning.AI</td></tr>
+  </table>
+
+  <hr>
+  <p style="font-size:0.82rem;color:var(--text2);text-align:center;margin-top:24px;">
+    本教程整合自 9 个主流 AI 学习平台，所有标注"免费"的资源均为公开可用，无需付费。
+  </p>
+
+</div>
+</body>
+</html>
